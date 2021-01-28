@@ -98,7 +98,7 @@ void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
    Signalfibre[i]=0;
   }*///only if you want to use SignalFibre[64]
 	
-	for (int i=0;i<10000;i++)
+	for (int i=0;i<1000000;i++)
 	Fiber_Hits[i]={0.};
 	
 	for (int i=0;i<200;i++)
