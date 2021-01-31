@@ -4,6 +4,9 @@
 #   and a custom target to for building all example N3 options ----------
 
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+
+project(B4_IDEA_CALO_FIBER)
+
 find_package(Geant4)
 include(${Geant4_USE_FILE})
 

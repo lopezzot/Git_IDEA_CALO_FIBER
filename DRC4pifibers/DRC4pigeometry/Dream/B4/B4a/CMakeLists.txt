@@ -29,6 +29,8 @@ include(${Geant4_USE_FILE})
 # Find HepMC (required package)
 #
 find_package(HepMC REQUIRED)
+find_package(EDM4HEP)
+find_package(podio)
 
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 find_package(ROOT REQUIRED COMPONENTS RIO EG)
@@ -52,7 +54,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 add_executable(exampleB4a exampleB4a.cc ${sources} ${headers})
 target_link_libraries(exampleB4a ${Geant4_LIBRARIES}
                       ${HEPMC_LIBRARIES} ${HEPMC_FIO_LIBRARIES}
-                      ${PYTHIA6_LIBRARIES} ${ROOT_LIBRARIES} gfortran)
+                      ${PYTHIA6_LIBRARIES} ${ROOT_LIBRARIES} gfortran EDM4HEP::edm4hep podio::podioRootIO)
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
