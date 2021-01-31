@@ -69,7 +69,9 @@ B4aEventAction::B4aEventAction()
    VectorL_loop(0.),
    Fiber_Hits{0.},
    Tracking_Hits{0.},
-   s_caloHits(0)
+   s_caloHits(0),
+   c_caloHits(0),
+   aux_infoHits(0)
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
