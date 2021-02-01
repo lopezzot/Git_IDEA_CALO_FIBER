@@ -36,6 +36,10 @@
 #include <vector>
 #include "G4ThreeVector.hh"
 
+/// podio includes
+
+#include "edm4hep/SimCalorimeterHitCollection.h"
+
 
 /// Event action class 
 
@@ -80,6 +84,7 @@ class B4aEventAction : public G4UserEventAction
     void AddVectorL(G4double de, G4int tower, G4int slice);
     void AddVectorR_loop(G4double de, G4int tower, G4int slice);
     void AddVectorL_loop(G4double de, G4int tower, G4int slice);
+
     
     typedef struct FiberInfo {
         G4double F_ID, F_E, F_X, F_Y, F_Z; //fiber saturated energy
@@ -94,6 +99,7 @@ class B4aEventAction : public G4UserEventAction
     } Tracking_Info;
     
     void WriteTracking_Info(G4double T_ID, G4ThreeVector Tpos, G4String Name, G4double Ek);
+  void PrepareForRun();
     
   private:
     G4int cont;
@@ -121,6 +127,9 @@ class B4aEventAction : public G4UserEventAction
     
     std::vector<G4double> VectorR; //vector with energy deposited in towers right
     std::vector<G4double> VectorL;
+  edm4hep::SimCalorimeterHitCollection * s_caloHits;
+  edm4hep::SimCalorimeterHitCollection * c_caloHits;
+  edm4hep::SimCalorimeterHitCollection * aux_infoHits;
 };
 
 // inline functions
@@ -236,6 +245,7 @@ inline void B4aEventAction::Addenergy(G4double de){
 }*/
                      
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 
 #endif
 

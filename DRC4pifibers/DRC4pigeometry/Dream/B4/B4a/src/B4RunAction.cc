@@ -35,6 +35,8 @@
 #include "G4RunManager.hh"
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4Threading.hh"
+
 #include <iostream>
 #include "stdlib.h"
 using namespace std;
@@ -44,6 +46,10 @@ using namespace std;
 #include "B4RunAction.hh"
 #include "B4Analysis.hh"
 
+#include "B4PodioManager.hh"
+#include "podio/EventStore.h"
+#include "podio/ROOTWriter.h"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B4RunAction::B4RunAction()
@@ -51,55 +57,13 @@ B4RunAction::B4RunAction()
 { 
   // set printing event number per each event
   G4RunManager::GetRunManager()->SetPrintProgress(1);     
-
-  // Create analysis manager
-  // The choice of analysis technology is done via selectin of a namespace
-  // in B4Analysis.hh
- /* G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
-  G4cout << "Using " << analysisManager->GetType() << G4endl;
-
-  const B4aEventAction* constEventAction = static_cast<const B4aEventAction*>(G4RunManager::GetRunManager()->GetUserEventAction());
-  B4aEventAction* eventAction = const_cast<B4aEventAction*>(constEventAction);
-
-
-  // Create directories 
-  //analysisManager->SetHistoDirectoryName("histograms");
-  //analysisManager->SetNtupleDirectoryName("ntuple");
-  analysisManager->SetVerboseLevel(0);
-  analysisManager->SetFirstHistoId(0);
-
-  // Book histograms, ntuple
-  //
-  
-  // Creating histograms
-  //analysisManager->CreateH1("1","Edep in module", 100, 0., 1000*MeV);
-  //analysisManager->CreateH1("2","trackL in module", 100, 0., 1*m);
-  //analysisManager->CreateH1("3", "Edep in scintillating fibers", 100, 0., 1000*MeV);
-  // Creating ntuple
-
-  //G4double vector[10]={0};
-  //vector<int>* interactions = new vector<int>();
-  //vector<G4double> vector[10]={0.};
-  //
-  analysisManager->CreateNtuple("B4", "Edep");
-  analysisManager->CreateNtupleDColumn("Eem");
-  analysisManager->CreateNtupleDColumn("EScin");
-  analysisManager->CreateNtupleDColumn("ECher");
-  analysisManager->CreateNtupleDColumn("Cherenkovintheglass");
-  analysisManager->CreateNtupleDColumn("Scinintheglass");
-  analysisManager->CreateNtupleDColumn("EnergyTot");
-  analysisManager->CreateNtupleDColumn("EnergyInside2mm");
-  analysisManager->CreateNtupleIColumn("prova",eventAction->GetVectorSignals());
-  analysisManager->FinishNtuple();*/
-
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B4RunAction::~B4RunAction()
 {
-  delete G4AnalysisManager::Instance();  
+  delete G4AnalysisManager::Instance();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -108,11 +72,9 @@ void B4RunAction::BeginOfRunAction(const G4Run* run/*run*/)
 { 
   //inform the runManager to save random number seed
   //G4RunManager::GetRunManager()->SetRandomNumberStore(true);
-  
   // Get analysis manager
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   G4cout<< "run " <<run->GetRunID()<<G4endl;
-
   std::stringstream ss;
   std::string myrun;
   ss<<run->GetRunID();
@@ -122,30 +84,20 @@ void B4RunAction::BeginOfRunAction(const G4Run* run/*run*/)
   G4String fileName = "B4";
   analysisManager->OpenFile(fileName);
 
-  // G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   G4cout << "Using " << analysisManager->GetType() << G4endl;
 
   const B4aEventAction* constEventAction = static_cast<const B4aEventAction*>(G4RunManager::GetRunManager()->GetUserEventAction());
   B4aEventAction* eventAction = const_cast<B4aEventAction*>(constEventAction);
-
+  eventAction->PrepareForRun();
 
   // Create directories 
-  //analysisManager->SetHistoDirectoryName("histograms");
-  //analysisManager->SetNtupleDirectoryName("ntuple");
   analysisManager->SetVerboseLevel(0);
   analysisManager->SetFirstHistoId(0);
 
   // Book histograms, ntuple
-  //
-  
-  // Creating histograms
-  //analysisManager->CreateH1("1","Edep in module", 100, 0., 1000*MeV);
-  //analysisManager->CreateH1("2","trackL in module", 100, 0., 1*m);
-  //analysisManager->CreateH1("3", "Edep in scintillating fibers", 100, 0., 1000*MeV);
   
   // Creating ntuple
   analysisManager->CreateNtuple("B4", "edep");
-	//TTree *tree = new TTree("B4","edep")
   analysisManager->CreateNtupleDColumn("Energyem");
   analysisManager->CreateNtupleDColumn("EnergyScin");
   analysisManager->CreateNtupleDColumn("EnergyCher");
@@ -155,7 +107,6 @@ void B4RunAction::BeginOfRunAction(const G4Run* run/*run*/)
   analysisManager->CreateNtupleSColumn("PrimaryParticleName");
   analysisManager->CreateNtupleDColumn("neutrinoleakage");
   analysisManager->CreateNtupleDColumn("leakage");
-  //analysisManager->CreateNtupleDColumn("ID");
   analysisManager->CreateNtupleDColumn("VectorSignalsR",eventAction->GetVectorSignalsR());
   analysisManager->CreateNtupleDColumn("VectorSignalsL",eventAction->GetVectorSignalsL());
   analysisManager->CreateNtupleDColumn("VectorSignalsCherR",eventAction->GetVectorSignalsCherR());
@@ -164,10 +115,8 @@ void B4RunAction::BeginOfRunAction(const G4Run* run/*run*/)
   analysisManager->CreateNtupleDColumn("VectorR", eventAction->GetVectorR());
   analysisManager->CreateNtupleDColumn("VectorL_loop", eventAction->GetVectorL_loop());
   analysisManager->CreateNtupleDColumn("VectorR_loop", eventAction->GetVectorR_loop()); 
-   //analysisManager->CreateNtupleDColumn("Position", eventAction->GetPosition());
-
   analysisManager->FinishNtuple();
-  //analysisManager->CreateNtupleDColumn("Scinintheglass");//if you want scintillating photons
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -183,6 +132,9 @@ void B4RunAction::EndOfRunAction(const G4Run* /*run*/)
   analysisManager->Write();
   analysisManager->CloseFile();
 
+  B4PodioManager * podioManager = B4PodioManager::Instance();
+  podioManager->Finish();
+  
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

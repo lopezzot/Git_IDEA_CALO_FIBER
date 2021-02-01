@@ -31,6 +31,7 @@
 #include "B4aEventAction.hh"
 #include "B4RunAction.hh"
 #include "B4Analysis.hh"
+#include "B4PodioManager.hh"
 
 #include "G4RunManager.hh"
 #include "G4Event.hh"
@@ -39,6 +40,10 @@
 #include "Randomize.hh"
 #include <iomanip>
 #include <vector>
+
+// podio includes
+
+#include "podio/ROOTWriter.h"
 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -63,7 +68,10 @@ B4aEventAction::B4aEventAction()
    VectorR_loop(0.),
    VectorL_loop(0.),
    Fiber_Hits{0.},
-   Tracking_Hits{0.}
+   Tracking_Hits{0.},
+   s_caloHits(0),
+   c_caloHits(0),
+   aux_infoHits(0)
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -170,6 +178,9 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
 
   // get analysis manager
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+  B4PodioManager * l_podioManager = B4PodioManager::Instance();
+  podio::EventStore * l_store = l_podioManager->GetEvtStore();
+  podio::ROOTWriter * l_writer = l_podioManager->GetWriter();
     
 	char namee[80];
 	
@@ -182,12 +193,26 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
 	G4double E=0.;
 	if(G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID()==0)	eventFile<<"EvtID\tFiberID\tEt\tXt\tYt\tZt\tFlagt\tslicet\ttowert"<<std::endl;
 	while(Fiber_Hits[v].F_ID!=0){
-	//G4cout<<Fiber_Hits[v].F_ID<<"\t"<<Fiber_Hits[v].F_E<<"\t"<<Fiber_Hits[v].F_Type<<"\t"<<Fiber_Hits[v].F_X<<" "<<Fiber_Hits[v].F_Y<<" "<<Fiber_Hits[v].F_Z<<std::endl;
-	E = E+Fiber_Hits[v].F_E;
-	eventFile<<G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID()<<"\t"<<std::fixed << std::setprecision(3) <<Fiber_Hits[v].F_ID<<"\t"<<Fiber_Hits[v].F_E<<"\t"<<Fiber_Hits[v].F_X<<"\t"<<Fiber_Hits[v].F_Y<<"\t"<<Fiber_Hits[v].F_Z<<"\t"<<Fiber_Hits[v].F_Type<<"\t"<<Fiber_Hits[v].F_slice<<"\t"<<Fiber_Hits[v].F_tower<<std::endl;
-	v++;}
+
+	  //G4cout<<Fiber_Hits[v].F_ID<<"\t"<<Fiber_Hits[v].F_E<<"\t"<<Fiber_Hits[v].F_Type<<"\t"<<Fiber_Hits[v].F_X<<" "<<Fiber_Hits[v].F_Y<<" "<<Fiber_Hits[v].F_Z<<std::endl;
+	  E = E+Fiber_Hits[v].F_E;
+	  eventFile<<G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID()<<"\t"<<std::fixed << std::setprecision(3) <<Fiber_Hits[v].F_ID<<"\t"<<Fiber_Hits[v].F_E<<"\t"<<Fiber_Hits[v].F_X<<"\t"<<Fiber_Hits[v].F_Y<<"\t"<<Fiber_Hits[v].F_Z<<"\t"<<Fiber_Hits[v].F_Type<<"\t"<<Fiber_Hits[v].F_slice<<"\t"<<Fiber_Hits[v].F_tower<<std::endl;
+	  if (Fiber_Hits[v].F_Type == 1){
+	    auto l_hit = s_caloHits->create();
+	    l_hit.setCellID((Fiber_Hits[v].F_ID));
+	    l_hit.setEnergy(Fiber_Hits[v].F_E);
+	    l_hit.setPosition({Fiber_Hits[v].F_X,Fiber_Hits[v].F_Y,Fiber_Hits[v].F_Z});
+	  } else if (Fiber_Hits[v].F_Type == 0){
+	    auto l_hit = c_caloHits->create();              
+            l_hit.setCellID((Fiber_Hits[v].F_ID));
+            l_hit.setEnergy(Fiber_Hits[v].F_E);
+            l_hit.setPosition({Fiber_Hits[v].F_X,Fiber_Hits[v].F_Y,Fiber_Hits[v].F_Z});
+	  }
+	  v++;
+	}
 	//eventFile<<"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"<<std::endl;
 	eventFile.close();
+	
 	
 	std::ofstream eventFile1;
 	eventFile1.open("Event_Track.txt", std::ios_base::app);
@@ -220,9 +245,58 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   analysisManager->FillNtupleDColumn(8, leakage);
   analysisManager->AddNtupleRow();//columns with vector are automatically filled with this function
 
+  auto l_hit = aux_infoHits->create();
+  l_hit.setCellID(0);
+  l_hit.setEnergy(Energyem);
+  l_hit = aux_infoHits->create();
+  l_hit.setCellID(1);
+  l_hit.setEnergy(EnergyScin);
+  l_hit = aux_infoHits->create();
+  l_hit.setCellID(2);
+  l_hit.setEnergy(EnergyCher);
+  l_hit = aux_infoHits->create();
+  l_hit.setCellID(3);
+  l_hit.setEnergy(NofCherenkovDetected);
+  l_hit = aux_infoHits->create();
+  l_hit.setCellID(4);
+  l_hit.setEnergy(EnergyTot);
+  l_hit = aux_infoHits->create();
+  l_hit.setCellID(5);
+  l_hit.setEnergy(PrimaryParticleEnergy);
+  l_hit = aux_infoHits->create();
+  l_hit.setCellID(6);
+  l_hit.setEnergy(0); // Not sure what PrimaryParticleEnergy actually is
+  l_hit = aux_infoHits->create();
+  l_hit.setCellID(7);
+  l_hit.setEnergy(neutrinoleakage);
+  l_hit = aux_infoHits->create();
+  l_hit.setCellID(8);
+  l_hit.setEnergy(leakage);
+  
   //print here if you need event by event some information of the screen
   //G4cout<<EnergyTot<<G4endl;
+  if (l_writer != NULL) l_writer->writeEvent();
+  if (l_store != NULL) l_store->clearCollections();
 
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void B4aEventAction::PrepareForRun()
+{
+  B4PodioManager* podioManager = B4PodioManager::Instance();
+  podio::EventStore * l_evtstore = podioManager->GetEvtStore();
+  if (l_evtstore == NULL) return;
+  podio::ROOTWriter * l_writer = podioManager->GetWriter();
+
+  s_caloHits = new edm4hep::SimCalorimeterHitCollection();
+  l_evtstore->registerCollection("S_caloHits",s_caloHits);
+  l_writer->registerForWrite("S_caloHits");
+
+  c_caloHits = new edm4hep::SimCalorimeterHitCollection();
+  l_evtstore->registerCollection("C_caloHits",c_caloHits);
+  l_writer->registerForWrite("C_caloHits");
+
+  aux_infoHits = new edm4hep::SimCalorimeterHitCollection();
+  l_evtstore->registerCollection("Auxiliary_infoHits",aux_infoHits);
+  l_writer->registerForWrite("Auxiliary_infoHits");
+}
+
