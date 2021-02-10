@@ -45,21 +45,16 @@
 
 #include "podio/ROOTWriter.h"
 
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-B4aEventAction::B4aEventAction()
+B4aEventAction::B4aEventAction() //definition of B4aEvenctAction contructor
  : G4UserEventAction(),
-   Energyem(0.),
+   Energyem(0.),                 //data members set to 0.
    neutrinoleakage(0.),
    leakage(0.),
    EnergyScin(0.),
    EnergyCher(0.),
-   NofCherenkovDetected(0),
-   //NofScintillationDetected(0),
    EnergyTot(0.),
    PrimaryParticleEnergy(0.),
-   VectorSignalsR(0.),
+   VectorSignalsR(0.),          //vectors set to 0-size vector
    VectorSignalsL(0.),
    VectorSignalsCherR(0.),
    VectorSignalsCherL(0.),
@@ -68,7 +63,6 @@ B4aEventAction::B4aEventAction()
    VectorR_loop(0.),
    VectorL_loop(0.),
    Fiber_Hits{0.},
-   Tracking_Hits{0.},
    s_caloHits(0),
    c_caloHits(0),
    aux_infoHits(0)
@@ -83,98 +77,98 @@ B4aEventAction::~B4aEventAction()
 
 void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
 {  
-	//Time_distribution event
-	std::ofstream TimeFile;
-	TimeFile.open("Time.txt", std::ios_base::app);
-	TimeFile<<"Event "<<G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID()<<" % % %"<<G4endl;
-	TimeFile.close();
+  //Time_distribution event
+  std::ofstream TimeFile;
+  TimeFile.open("Time.txt", std::ios_base::app);
+  TimeFile<<"Event "<<G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID()<<" % % %"<<G4endl;
+  TimeFile.close();
 	
   // initialisation per event
   Energyem = 0.;
   EnergyScin = 0.;
   EnergyCher = 0.;
-  NofCherenkovDetected = 0;
-  //NofScintillationDetected = 0;
   EnergyTot = 0.;
   neutrinoleakage = 0.;
   leakage = 0.;
+  PrimaryParticleEnergy = 0;  
   
   int fNbOfBarrel = 40;
   int fNbOfEndcap = 35;
   int fNbOfZRot = 36;
-  /*for(int i=0;i<64;i++){
-   Signalfibre[i]=0;
-  }*///only if you want to use SignalFibre[64]
 	
-	for (int i=0;i<1000000;i++)
-	Fiber_Hits[i]={0.};
+  for (int i=0;i<1000000;i++) Fiber_Hits[i]={0.};
 	
-	for (int i=0;i<200;i++)
-	Tracking_Hits[i]={0.};
+  for (int i=0;i<VectorR.size();i++){VectorR.at(i)=0.;}
 
-    for (int i=0;i<VectorR.size();i++){
-    VectorR.at(i)=0.;
-    }
-    for (int i=0;i<VectorL.size();i++){
-    VectorL.at(i)=0.;
-    }
+  for (int i=0;i<VectorL.size();i++){VectorL.at(i)=0.;}
 	
-	for (int i=0;i<VectorR_loop.size();i++){
-    VectorR_loop.at(i)=0.;
-    }
-    for (int i=0;i<VectorL_loop.size();i++){
-    VectorL_loop.at(i)=0.;
-    }
+  for (int i=0;i<VectorR_loop.size();i++){VectorR_loop.at(i)=0.;}
+
+  for (int i=0;i<VectorL_loop.size();i++){VectorL_loop.at(i)=0.;}
        
-    for (int i=0;i<VectorSignalsR.size();i++){
-    VectorSignalsR.at(i)=0.;
-    }
-    for (int i=0;i<VectorSignalsL.size();i++){
-    VectorSignalsL.at(i)=0.;
-    }
-    for (int i=0;i<VectorSignalsCherR.size();i++){
-    VectorSignalsCherR.at(i)=0.;
-    }
-    for (int i=0;i<VectorSignalsCherL.size();i++){
-    VectorSignalsCherL.at(i)=0.;
-    }
-    PrimaryParticleEnergy = 0;  
+  for (int i=0;i<VectorSignalsR.size();i++){VectorSignalsR.at(i)=0.;}
     
-    for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
-        if(VectorR.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
-    VectorR.push_back(0.);}}
-    for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
-        if(VectorL.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
-    VectorL.push_back(0.);}}
-    
-    for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
-        if(VectorR_loop.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
-    VectorR_loop.push_back(0.);}}
-    for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
-        if(VectorL_loop.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
-    VectorL_loop.push_back(0.);}}
+  for (int i=0;i<VectorSignalsL.size();i++){VectorSignalsL.at(i)=0.;}
 
-    for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
-        if(VectorSignalsR.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
-    VectorSignalsR.push_back(0.);}}
-    for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
-        if(VectorSignalsL.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
-    VectorSignalsL.push_back(0.);}}
-    //VectorSignals.at(i)=0;}
-    for(int k=0;k<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);k++){
-        if(VectorSignalsCherR.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
-    VectorSignalsCherR.push_back(0.);}}
-    for(int k=0;k<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);k++){
-        if(VectorSignalsCherL.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
-    VectorSignalsCherL.push_back(0.);}}
+  for (int i=0;i<VectorSignalsCherR.size();i++){VectorSignalsCherR.at(i)=0.;}
+
+  for (int i=0;i<VectorSignalsCherL.size();i++){VectorSignalsCherL.at(i)=0.;}
+    
+  for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
+    if(VectorR.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
+      VectorR.push_back(0.);
+    }
+  }
+
+  for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
+    if(VectorL.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
+      VectorL.push_back(0.);
+    }
+  }
+    
+  for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
+    if(VectorR_loop.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
+      VectorR_loop.push_back(0.);
+    }
+  }
+    
+  for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
+    if(VectorL_loop.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
+      VectorL_loop.push_back(0.);
+    }
+  }
+
+  for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
+    if(VectorSignalsR.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
+      VectorSignalsR.push_back(0.);
+    }
+  }
+    
+  for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
+    if(VectorSignalsL.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
+    VectorSignalsL.push_back(0.);
+    }
+  }
+
+  for(int k=0;k<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);k++){
+    if(VectorSignalsCherR.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
+      VectorSignalsCherR.push_back(0.);
+    }
+  }
+  
+  for(int k=0;k<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);k++){
+    if(VectorSignalsCherL.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
+      VectorSignalsCherL.push_back(0.);
+    }
+  }
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void B4aEventAction::EndOfEventAction(const G4Event* event)
 {
-  // Accumulate statistics
-  //
+  // Accumulate statistics over events
 
   // get analysis manager
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
@@ -182,57 +176,37 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   podio::EventStore * l_store = l_podioManager->GetEvtStore();
   podio::ROOTWriter * l_writer = l_podioManager->GetWriter();
     
-	char namee[80];
 	
-	std::ofstream eventFile;
-	eventFile.open("Event.txt", std::ios_base::app);
-	/*G4cout<<"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"<<std::endl;
-	G4cout<<"\t ID \t Energy(MeV) \t S/C \t Position \t slice \t tower"<<std::endl;
-	G4cout<<"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"<<std::endl;*/
-	int v=0;
-	G4double E=0.;
-	if(G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID()==0)	eventFile<<"EvtID\tFiberID\tEt\tXt\tYt\tZt\tFlagt\tslicet\ttowert"<<std::endl;
-	while(Fiber_Hits[v].F_ID!=0){
+  // write fiber-by-fiber into file and store in podio Hits
+  std::ofstream eventFile;
+  eventFile.open("Event.txt", std::ios_base::app);
+  /*G4cout<<"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"<<std::endl;
+  G4cout<<"\t ID \t Energy(MeV) \t S/C \t Position \t slice \t tower"<<std::endl;
+  G4cout<<"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"<<std::endl;*/
+  int v=0;
+  G4double E=0.;
+  if(G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID()==0) eventFile<<"EvtID\tFiberID\tEt\tXt\tYt\tZt\tFlagt\tslicet\ttowert"<<std::endl;
+  while(Fiber_Hits[v].F_ID!=0){
+    E = E+Fiber_Hits[v].F_E;
 
-	  //G4cout<<Fiber_Hits[v].F_ID<<"\t"<<Fiber_Hits[v].F_E<<"\t"<<Fiber_Hits[v].F_Type<<"\t"<<Fiber_Hits[v].F_X<<" "<<Fiber_Hits[v].F_Y<<" "<<Fiber_Hits[v].F_Z<<std::endl;
-	  E = E+Fiber_Hits[v].F_E;
-	  eventFile<<G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID()<<"\t"<<std::fixed << std::setprecision(3) <<Fiber_Hits[v].F_ID<<"\t"<<Fiber_Hits[v].F_E<<"\t"<<Fiber_Hits[v].F_X<<"\t"<<Fiber_Hits[v].F_Y<<"\t"<<Fiber_Hits[v].F_Z<<"\t"<<Fiber_Hits[v].F_Type<<"\t"<<Fiber_Hits[v].F_slice<<"\t"<<Fiber_Hits[v].F_tower<<std::endl;
-	  if (Fiber_Hits[v].F_Type == 1){
-	    auto l_hit = s_caloHits->create();
-	    l_hit.setCellID((Fiber_Hits[v].F_ID));
-	    l_hit.setEnergy(Fiber_Hits[v].F_E);
-	    l_hit.setPosition({Fiber_Hits[v].F_X,Fiber_Hits[v].F_Y,Fiber_Hits[v].F_Z});
-	  } else if (Fiber_Hits[v].F_Type == 0){
-	    auto l_hit = c_caloHits->create();              
-            l_hit.setCellID((Fiber_Hits[v].F_ID));
-            l_hit.setEnergy(Fiber_Hits[v].F_E);
-            l_hit.setPosition({Fiber_Hits[v].F_X,Fiber_Hits[v].F_Y,Fiber_Hits[v].F_Z});
-	  }
-	  v++;
-	}
-	//eventFile<<"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"<<std::endl;
-	eventFile.close();
+    eventFile<<G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID()<<"\t"<<std::fixed << std::setprecision(3) <<Fiber_Hits[v].F_ID<<"\t"<<Fiber_Hits[v].F_E<<"\t"<<Fiber_Hits[v].F_X<<"\t"<<Fiber_Hits[v].F_Y<<"\t"<<Fiber_Hits[v].F_Z<<"\t"<<Fiber_Hits[v].F_Type<<"\t"<<Fiber_Hits[v].F_slice<<"\t"<<Fiber_Hits[v].F_tower<<std::endl;
+
+    if (Fiber_Hits[v].F_Type == 1){
+      auto l_hit = s_caloHits->create();
+      l_hit.setCellID((Fiber_Hits[v].F_ID));
+      l_hit.setEnergy(Fiber_Hits[v].F_E);
+      l_hit.setPosition({Fiber_Hits[v].F_X,Fiber_Hits[v].F_Y,Fiber_Hits[v].F_Z});
+    } 
+    else if (Fiber_Hits[v].F_Type == 0){
+      auto l_hit = c_caloHits->create();              
+      l_hit.setCellID((Fiber_Hits[v].F_ID));
+      l_hit.setEnergy(Fiber_Hits[v].F_E);
+      l_hit.setPosition({Fiber_Hits[v].F_X,Fiber_Hits[v].F_Y,Fiber_Hits[v].F_Z});
+    }
+    v++;
+  }
+  eventFile.close();
 	
-	
-	std::ofstream eventFile1;
-	eventFile1.open("Event_Track.txt", std::ios_base::app);
-	if(G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID()==0)	eventFile1<<"EvtIDtrack\tTrackID\tXtrackt\tYtrackt\tZtrackt\tparticlesnamet"<<std::endl;
-	for (v=0;v<200;v++){
-		if(Tracking_Hits[v].T_ID!=0){
-		eventFile1<<G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID()<<"\t"<<Tracking_Hits[v].T_ID<<"\t"<<Tracking_Hits[v].T_X<<"\t"<<Tracking_Hits[v].T_Y<<"\t"<<Tracking_Hits[v].T_Z<<"\t"<<Tracking_Hits[v].T_Name<<std::endl;
-	}}
-	eventFile1.close();
-	//eventFile<<"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"<<std::endl;
-	
-	/*G4cout<<"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"<<std::endl;
-	G4cout<<"N fired: "<<v<<"\t tot E: "<<E<<"\t Lor: "<<NofCherenkovDetected<<std::endl;*/
-	
-	
-  // fill histograms
-  //analysisManager->FillH1(1, Energymodule);
-  //analysisManager->FillH1(2, TrackLmodule);
-  //analysisManager->FillH1(3, EnergyScin);
-  
   // fill ntuple event by event
   analysisManager->FillNtupleDColumn(0, Energyem);
   analysisManager->FillNtupleDColumn(1, EnergyScin);
@@ -243,7 +217,7 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   analysisManager->FillNtupleSColumn(6, PrimaryParticleName);
   analysisManager->FillNtupleDColumn(7, neutrinoleakage);
   analysisManager->FillNtupleDColumn(8, leakage);
-  analysisManager->AddNtupleRow();//columns with vector are automatically filled with this function
+  analysisManager->AddNtupleRow();          //columns with vector are automatically filled with this function
 
   auto l_hit = aux_infoHits->create();
   l_hit.setCellID(0);
