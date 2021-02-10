@@ -86,14 +86,13 @@ class B4aEventAction : public G4UserEventAction
     //define fiber struct: contain info of fiber integrated signal and fiber location, include methods to fill it hit-by-hit
     struct Fiber{
       int ID, Type, Slice, Tower;           //fiber ID, type (S or C), slice, tower
-      G4double E;                           //number of p.e. in fiber 
+      int E;                                //number of p.e. in fiber 
       G4ThreeVector Pos;                    //inner tip position (X,Y,Z) (mm)
-      std::vector<float> phtimes;                //vector of float, each float is a single photon time of arrival 
+      std::vector<double> phtimes;                //vector of float, each float is a single photon time of arrival 
       
-      void addfiber(Fiber *f1){             //function to add single hit to fiber integrated signal (single hit passed by reference)
-	E = E+f1->E;                        //add hit photons
-	phtimes.insert(phtimes.end(), f1->phtimes.begin(), f1->phtimes.end()); //append photons time of arriva
-      
+      void addfiber(Fiber f1){             //function to add single hit to fiber integrated signal (single hit passed by reference)
+	E = E+f1.E;                        //add hit photons
+	phtimes.insert(phtimes.end(), f1.phtimes.begin(), f1.phtimes.end()); //append photons time of arriva
       };	
       
       void orderphtimes(){ //function to order photon times from first to last
@@ -101,9 +100,21 @@ class B4aEventAction : public G4UserEventAction
       };
     };
 
+    void appendfiber(int ID, int Type, int Slice, int Tower, int E, G4ThreeVector Pos, std::vector<double> phtimes){//function to search if fiber already exists
+      Fiber f{ID, Type, Slice, Tower, E, Pos, phtimes};
+      auto it = find(FiberIDs.begin(), FiberIDs.end(), f.ID); //return iterator to fiber ID if exhists or FiberIDs.end() if fiber ID is not found
+      if ( it == FiberIDs.end() ){       //fiber not found
+        FiberIDs.push_back(f.ID);       //push_back fiber ID
+	Fibers.push_back(f);            //push_back fiber
+      }										
+      else {                             //fiber found
+        Fibers[distance(FiberIDs.begin(), it)].addfiber(f); //add fiber contribution with addfiber()
+      }								
+    };
+
     typedef struct FiberInfo {
         G4double F_ID, F_E, F_X, F_Y, F_Z; //fiber saturated energy
-        G4int F_Type, F_slice, F_tower; //C==0 S ==1;
+        G4int F_Type, F_slice, F_tower; //C==0 S==1;
     } Fiber_Info;
     
     void WriteFiber_Info(G4double FID, G4double FE, G4int FType, G4ThreeVector Fpos, G4int slice, G4int tower);
@@ -146,7 +157,7 @@ inline void B4aEventAction::Addleakage(G4double de){leakage += de;}
 
 inline void B4aEventAction::AddVectorR(G4double de, G4int tower, G4int slice){VectorR.at(tower+(slice*75)) += de;}
 
-inline void B4aEventAction::AddVectorL(G4double de, G4int tower, G4int slice){tower = -1*tower;
+inline void B4aEventAction::AddVectorL(G4double de, G4int tower, G4int slice){
 	tower = -1*tower;
 	VectorL.at(tower+(slice*75)) += de;
 }

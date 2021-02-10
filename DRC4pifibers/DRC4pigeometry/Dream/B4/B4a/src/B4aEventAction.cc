@@ -63,6 +63,8 @@ B4aEventAction::B4aEventAction() //definition of B4aEvenctAction contructor
    VectorR_loop(0.),
    VectorL_loop(0.),
    Fiber_Hits{0.},
+   Fibers(0.),                 //vector of Fibers
+   FiberIDs(0),                //vector of Fibers IDs
    s_caloHits(0),
    c_caloHits(0),
    aux_infoHits(0)
@@ -95,8 +97,12 @@ void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
   int fNbOfBarrel = 40;
   int fNbOfEndcap = 35;
   int fNbOfZRot = 36;
+  std::cout<<Fibers.size()<<"<--This is fibers size at begin of event"<<std::endl;
+  Fibers.clear();
+
+  FiberIDs.clear(); 
 	
-  for (int i=0;i<1000000;i++) Fiber_Hits[i]={0.};
+  for (int i=0;i<1000000;i++) {Fiber_Hits[i]={0};}
 	
   for (int i=0;i<VectorR.size();i++){VectorR.at(i)=0.;}
 
@@ -168,21 +174,19 @@ void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
 
 void B4aEventAction::EndOfEventAction(const G4Event* event)
 {
-  // Accumulate statistics over events
+  //accumulate statistics over events
 
-  // get analysis manager
+  //get analysis manager
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   B4PodioManager * l_podioManager = B4PodioManager::Instance();
   podio::EventStore * l_store = l_podioManager->GetEvtStore();
   podio::ROOTWriter * l_writer = l_podioManager->GetWriter();
     
+  std::cout<<Fibers.size()<<" <-This is Fibers size"<<std::endl;
 	
-  // write fiber-by-fiber into file and store in podio Hits
+  //write fiber-by-fiber into file and store in podio Hits
   std::ofstream eventFile;
   eventFile.open("Event.txt", std::ios_base::app);
-  /*G4cout<<"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"<<std::endl;
-  G4cout<<"\t ID \t Energy(MeV) \t S/C \t Position \t slice \t tower"<<std::endl;
-  G4cout<<"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"<<std::endl;*/
   int v=0;
   G4double E=0.;
   if(G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID()==0) eventFile<<"EvtID\tFiberID\tEt\tXt\tYt\tZt\tFlagt\tslicet\ttowert"<<std::endl;
