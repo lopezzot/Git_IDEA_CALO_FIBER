@@ -195,10 +195,11 @@ void B4aSteppingAction::UserSteppingAction(const G4Step* step)
 	double distance = sqrt((SiPMvecPos[0]-step->GetTrack()->GetPosition().getX())*(SiPMvecPos[0]-step->GetTrack()->GetPosition().getX())+(SiPMvecPos[1]-step->GetTrack()->GetPosition().getY())*(SiPMvecPos[1]-step->GetTrack()->GetPosition().getY())+(SiPMvecPos[2]-step->GetTrack()->GetPosition().getZ())*(SiPMvecPos[2]-step->GetTrack()->GetPosition().getZ()));
 	//calculate time of arrival 
 	const float speed_s_fiber = 299.792458/1.59;      //mm/ns
-	double time_travel = distance/(speed_s_fiber*angle_distribution(generator));
+	double time_travel;
 	vector<double> phtimes;                           //create vector of n identical times of arrival
 	
 	for(int i=0;i<s_signal;i++){
+                time_travel = distance/(speed_s_fiber*angle_distribution(generator));
 		phtimes.push_back(step->GetTrack()->GetGlobalTime() + time_distribution(generator) + time_travel);
 	}
 	
@@ -294,8 +295,12 @@ void B4aSteppingAction::UserSteppingAction(const G4Step* step)
             double distance = sqrt((SiPMvecPos[0]-step->GetTrack()->GetPosition().getX())*(SiPMvecPos[0]-step->GetTrack()->GetPosition().getX())+(SiPMvecPos[1]-step->GetTrack()->GetPosition().getY())*(SiPMvecPos[1]-step->GetTrack()->GetPosition().getY())+(SiPMvecPos[2]-step->GetTrack()->GetPosition().getZ())*(SiPMvecPos[2]-step->GetTrack()->GetPosition().getZ()));
 	    //calculate time of arrival 
 	    const float speed_s_fiber = 299.792458/1.59;     //mm/ns
-	    double time_travel = distance/(speed_s_fiber*angle_distribution(generator));
-	    vector<double> phtimes (c_signal, step->GetTrack()->GetGlobalTime() + time_travel);         //create vector of n identical times of arrival
+	    double time_travel;
+	    vector<double> phtimes;
+	    for (int i = 0; i<c_signal; i++){
+	      time_travel = distance/(speed_s_fiber*angle_distribution(generator));
+	      phtimes.push_back(step->GetTrack()->GetGlobalTime() + time_travel);     //fill vector of photon times    
+	    }
 	    fEventAction->appendfiber(C_fiber_ID, 0, copynumberslice, copynumbertower, c_signal, vectPostip, phtimes);
 	    //std::ofstream TimeFile;
             //TimeFile.open("Time.txt", std::ios_base::app);
