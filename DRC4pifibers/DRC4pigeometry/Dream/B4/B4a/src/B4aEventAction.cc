@@ -80,10 +80,10 @@ B4aEventAction::~B4aEventAction()
 void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
 {  
   //Time_distribution event
-  std::ofstream TimeFile;
-  TimeFile.open("Time.txt", std::ios_base::app);
-  TimeFile<<"Event "<<G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID()<<" % % %"<<G4endl;
-  TimeFile.close();
+  //std::ofstream TimeFile;
+  //TimeFile.open("Time.txt", std::ios_base::app);
+  //TimeFile<<"Event "<<G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID()<<" % % %"<<G4endl;
+  //TimeFile.close();
 	
   // initialisation per event
   Energyem = 0.;
@@ -183,7 +183,7 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   podio::ROOTWriter * l_writer = l_podioManager->GetWriter();
     
   //write fiber-by-fiber into file and store in podio Hits
-  std::ofstream eventFile;
+  /*std::ofstream eventFile;
   eventFile.open("Event.txt", std::ios_base::app);
   int v=0;
   G4double E=0.;
@@ -207,8 +207,29 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
     }
     v++;
   }
-  eventFile.close();
-	
+  eventFile.close();*/
+
+  //order time of arrival vector in Fibers before storing info
+  for (int i = 0; i<Fibers.size(); i++){Fibers[i].orderphtimes();}  
+
+  //new way to store fiber-by-fiber info in edm4hep/podio
+  for (Fiber fiber : Fibers) {
+    if (fiber.Type == 1){                         //scintillating
+      auto l_hit = s_caloHits->create();
+      l_hit.setCellID(fiber.ID);
+      l_hit.setEnergy(fiber.E);
+      l_hit.setPosition({fiber.Pos.X,fiber.Pos.Y,fiber.Pos.Z});
+      //store me -> fiber.phtimes
+    } 
+    else if (fiber.Type == 0){                    //cherenkov
+      auto l_hit = c_caloHits->create();              
+      l_hit.setCellID(fiber.ID);
+      l_hit.setEnergy(fiber.E);
+      l_hit.setPosition({fiber.Pos.X,fiber.Pos.Y,fiber.Pos.Z});
+      //store me -> fiber.phtimes
+    }
+  }
+
   // fill ntuple event by event
   analysisManager->FillNtupleDColumn(0, Energyem);
   analysisManager->FillNtupleDColumn(1, EnergyScin);
