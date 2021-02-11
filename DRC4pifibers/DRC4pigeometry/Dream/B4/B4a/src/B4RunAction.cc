@@ -39,7 +39,6 @@
 
 #include <iostream>
 #include "stdlib.h"
-using namespace std;
 #include "B4aEventAction.hh"
 #include <sstream>
 
@@ -79,8 +78,8 @@ void B4RunAction::BeginOfRunAction(const G4Run* run/*run*/)
   std::string myrun;
   ss<<run->GetRunID();
   ss>>myrun;
+
   // Open an output file
-  //
   G4String fileName = "B4";
   analysisManager->OpenFile(fileName);
 
@@ -94,14 +93,11 @@ void B4RunAction::BeginOfRunAction(const G4Run* run/*run*/)
   analysisManager->SetVerboseLevel(0);
   analysisManager->SetFirstHistoId(0);
 
-  // Book histograms, ntuple
-  
   // Creating ntuple
   analysisManager->CreateNtuple("B4", "edep");
   analysisManager->CreateNtupleDColumn("Energyem");
   analysisManager->CreateNtupleDColumn("EnergyScin");
   analysisManager->CreateNtupleDColumn("EnergyCher");
-  analysisManager->CreateNtupleDColumn("NofCherenkovDetected"); 
   analysisManager->CreateNtupleDColumn("EnergyTot");
   analysisManager->CreateNtupleDColumn("PrimaryParticleEnergy");
   analysisManager->CreateNtupleSColumn("PrimaryParticleName");

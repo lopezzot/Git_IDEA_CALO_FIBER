@@ -97,7 +97,7 @@ void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
   int fNbOfBarrel = 40;
   int fNbOfEndcap = 35;
   int fNbOfZRot = 36;
-  std::cout<<Fibers.size()<<"<--This is fibers size at begin of event"<<std::endl;
+
   Fibers.clear();
 
   FiberIDs.clear(); 
@@ -182,8 +182,6 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   podio::EventStore * l_store = l_podioManager->GetEvtStore();
   podio::ROOTWriter * l_writer = l_podioManager->GetWriter();
     
-  std::cout<<Fibers.size()<<" <-This is Fibers size"<<std::endl;
-	
   //write fiber-by-fiber into file and store in podio Hits
   std::ofstream eventFile;
   eventFile.open("Event.txt", std::ios_base::app);
@@ -215,13 +213,13 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   analysisManager->FillNtupleDColumn(0, Energyem);
   analysisManager->FillNtupleDColumn(1, EnergyScin);
   analysisManager->FillNtupleDColumn(2, EnergyCher);
-  analysisManager->FillNtupleDColumn(3, NofCherenkovDetected);
-  analysisManager->FillNtupleDColumn(4, EnergyTot);
-  analysisManager->FillNtupleDColumn(5, PrimaryParticleEnergy);
-  analysisManager->FillNtupleSColumn(6, PrimaryParticleName);
-  analysisManager->FillNtupleDColumn(7, neutrinoleakage);
-  analysisManager->FillNtupleDColumn(8, leakage);
-  analysisManager->AddNtupleRow();          //columns with vector are automatically filled with this function
+  //analysisManager->FillNtupleDColumn(3, NofCherenkovDetected);
+  analysisManager->FillNtupleDColumn(3, EnergyTot);
+  analysisManager->FillNtupleDColumn(4, PrimaryParticleEnergy);
+  analysisManager->FillNtupleSColumn(5, PrimaryParticleName);
+  analysisManager->FillNtupleDColumn(6, neutrinoleakage);
+  analysisManager->FillNtupleDColumn(7, leakage);
+  analysisManager->AddNtupleRow();                               //columns with vector are automatically filled with this function
 
   auto l_hit = aux_infoHits->create();
   l_hit.setCellID(0);
@@ -234,7 +232,7 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   l_hit.setEnergy(EnergyCher);
   l_hit = aux_infoHits->create();
   l_hit.setCellID(3);
-  l_hit.setEnergy(NofCherenkovDetected);
+  l_hit.setEnergy(0); //previsouly allocated for NumberofCherenkovDetected (now storing 0, to be removed)
   l_hit = aux_infoHits->create();
   l_hit.setCellID(4);
   l_hit.setEnergy(EnergyTot);
@@ -243,7 +241,7 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   l_hit.setEnergy(PrimaryParticleEnergy);
   l_hit = aux_infoHits->create();
   l_hit.setCellID(6);
-  l_hit.setEnergy(0); // Not sure what PrimaryParticleEnergy actually is
+  l_hit.setEnergy(0); // Not sure what PrimaryParticleEnergy actually is (if needed PDGID can be stored here)
   l_hit = aux_infoHits->create();
   l_hit.setCellID(7);
   l_hit.setEnergy(neutrinoleakage);
@@ -252,7 +250,8 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   l_hit.setEnergy(leakage);
   
   //print here if you need event by event some information of the screen
-  //G4cout<<EnergyTot<<G4endl;
+  std::cout<<"--->Event number of activated fibers: "<<Fibers.size()<<"<---"<<std::endl;
+
   if (l_writer != NULL) l_writer->writeEvent();
   if (l_store != NULL) l_store->clearCollections();
 

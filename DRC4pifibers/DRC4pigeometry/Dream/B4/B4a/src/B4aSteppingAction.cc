@@ -42,6 +42,7 @@
 
 #include <chrono>
 #include <random>
+#include <cmath>
 
 #include "TLorentzVector.h"
 
@@ -83,6 +84,13 @@ void B4aSteppingAction::UserSteppingAction(const G4Step* step)
 
   std::poisson_distribution<int> scin_distribution(1.);
   
+  std::exponential_distribution<double> time_distribution(2.8);
+
+  float maxangle = 20.4*M_PI/180.;
+  float cosmaxangle = cos(maxangle);
+
+  std::uniform_real_distribution<> angle_distribution(cosmaxangle,1.);
+
   //Add energy deposited in towers (copper only)  
   if (PreStepVolume->GetName() != "World"){
     fEventAction->Addenergy(energydeposited);
@@ -163,7 +171,7 @@ void B4aSteppingAction::UserSteppingAction(const G4Step* step)
       //unique Fiber ID needed: 168750000 is the max of Sfibercopynumber
       S_fiber_ID = Sfibercopynumber-(168750000*copynumberslice);
     }
-    vector<float> test = {0.0,0.1,0.2};    
+
     //Fill vector of Fibers
     if (saturatedenergydeposited>0.){
       //local to global transformation
@@ -186,9 +194,14 @@ void B4aSteppingAction::UserSteppingAction(const G4Step* step)
 	//calculate distance from SiPM (mm)
 	double distance = sqrt((SiPMvecPos[0]-step->GetTrack()->GetPosition().getX())*(SiPMvecPos[0]-step->GetTrack()->GetPosition().getX())+(SiPMvecPos[1]-step->GetTrack()->GetPosition().getY())*(SiPMvecPos[1]-step->GetTrack()->GetPosition().getY())+(SiPMvecPos[2]-step->GetTrack()->GetPosition().getZ())*(SiPMvecPos[2]-step->GetTrack()->GetPosition().getZ()));
 	//calculate time of arrival 
-	const float speed_s_fiber = 299.792458/1.59;     //mm/ns
-	double time = distance/speed_s_fiber;
-	vector<double> phtimes (s_signal, time);          //create vector of n identical times of arrival
+	const float speed_s_fiber = 299.792458/1.59;      //mm/ns
+	double time_travel = distance/(speed_s_fiber*angle_distribution(generator));
+	vector<double> phtimes;                           //create vector of n identical times of arrival
+	
+	for(int i=0;i<s_signal;i++){
+		phtimes.push_back(step->GetTrack()->GetGlobalTime() + time_distribution(generator) + time_travel);
+	}
+	
 	fEventAction->appendfiber(S_fiber_ID, 1, copynumberslice, copynumbertower, s_signal, vectPostip, phtimes);
 	// Extract info for z time
 	//std::ofstream TimeFile;
@@ -281,8 +294,8 @@ void B4aSteppingAction::UserSteppingAction(const G4Step* step)
             double distance = sqrt((SiPMvecPos[0]-step->GetTrack()->GetPosition().getX())*(SiPMvecPos[0]-step->GetTrack()->GetPosition().getX())+(SiPMvecPos[1]-step->GetTrack()->GetPosition().getY())*(SiPMvecPos[1]-step->GetTrack()->GetPosition().getY())+(SiPMvecPos[2]-step->GetTrack()->GetPosition().getZ())*(SiPMvecPos[2]-step->GetTrack()->GetPosition().getZ()));
 	    //calculate time of arrival 
 	    const float speed_s_fiber = 299.792458/1.59;     //mm/ns
-	    double time = distance/speed_s_fiber;
-	    vector<double> phtimes (c_signal, time);         //create vector of n identical times of arrival
+	    double time_travel = distance/(speed_s_fiber*angle_distribution(generator));
+	    vector<double> phtimes (c_signal, step->GetTrack()->GetGlobalTime() + time_travel);         //create vector of n identical times of arrival
 	    fEventAction->appendfiber(C_fiber_ID, 0, copynumberslice, copynumbertower, c_signal, vectPostip, phtimes);
 	    //std::ofstream TimeFile;
             //TimeFile.open("Time.txt", std::ios_base::app);
