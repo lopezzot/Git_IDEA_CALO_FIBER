@@ -88,7 +88,7 @@ class B4aEventAction : public G4UserEventAction
       int ID, Type, Slice, Tower;           //fiber ID, type (S or C), slice, tower
       int E;                                //number of p.e. in fiber 
       G4ThreeVector Pos;                    //inner tip position (X,Y,Z) (mm)
-      std::vector<double> phtimes;                //vector of float, each float is a single photon time of arrival 
+      std::vector<double> phtimes;          //vector of float, each float is a single photon time of arrival 
       
       void addfiber(Fiber f1){             //function to add single hit to fiber integrated signal (single hit passed by reference)
 	E = E+f1.E;                        //add hit photons

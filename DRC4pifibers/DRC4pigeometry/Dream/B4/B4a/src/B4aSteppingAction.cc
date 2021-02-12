@@ -158,7 +158,7 @@ void B4aSteppingAction::UserSteppingAction(const G4Step* step)
     scin_distribution = std::poisson_distribution<int> (saturatedenergydeposited*12.5); //smear light emission according to Poissonian distribution
     int s_signal = scin_distribution(generator);                                        //S signal
 	
-    if (copynumbertower > 0){                                                           //in barrel right or endcap right
+    if (copynumbertower > 0){                                                       //in barrel right or endcap right
       fEventAction->AddVectorScinEnergyR(s_signal,copynumbertower, copynumberslice);    //store signal in vector of towers
       fEventAction->AddVectorR(energydeposited, copynumbertower, copynumberslice);      //store energy deposited in vector of towers
        //unique Fiber ID needed: 168750000 is the max of Sfibercopynumber
