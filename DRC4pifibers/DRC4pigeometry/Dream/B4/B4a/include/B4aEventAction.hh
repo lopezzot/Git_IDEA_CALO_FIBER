@@ -39,6 +39,7 @@
 /// podio includes
 
 #include "edm4hep/SimCalorimeterHitCollection.h"
+#include "edm4hep/CaloHitContributionCollection.h"
 
 
 /// Event action class 
@@ -148,6 +149,11 @@ private:
     edm4hep::SimCalorimeterHitCollection * s_caloHits;
     edm4hep::SimCalorimeterHitCollection * c_caloHits;
     edm4hep::SimCalorimeterHitCollection * aux_infoHits;
+
+  // detailed information for timing of the signal
+
+  edm4hep::CaloHitContributionCollection * s_caloHitContributions;
+  edm4hep::CaloHitContributionCollection * c_caloHitContributions;
 };
 
 // inline functions

@@ -210,7 +210,7 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   eventFile.close();*/
 
   //order time of arrival vector in Fibers before storing info
-  for (int i = 0; i<Fibers.size(); i++){Fibers[i].orderphtimes();}  
+  for (unsigned int i = 0; i<Fibers.size(); ++i){Fibers[i].orderphtimes();}  
 
   //new way to store fiber-by-fiber info in edm4hep/podio
   for (Fiber fiber : Fibers) {
@@ -219,13 +219,25 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
       l_hit.setCellID(fiber.ID);
       l_hit.setEnergy(fiber.E);
       l_hit.setPosition({fiber.Pos.X,fiber.Pos.Y,fiber.Pos.Z});
-      //store me -> fiber.phtimes
+      // Create the CaloHitContributions
+      for (auto ph_time : fiber.phtimes){
+	std::cout << "S ph_time = " << ph_time << std::endl;
+	auto l_hitContrib = s_caloHitContributions->create();
+	l_hitContrib.setTime(ph_time);
+	l_hit.addToContributions(l_hitContrib);
+      }
     } 
     else if (fiber.Type == 0){                    //cherenkov
       auto l_hit = c_caloHits->create();              
       l_hit.setCellID(fiber.ID);
       l_hit.setEnergy(fiber.E);
       l_hit.setPosition({fiber.Pos.X,fiber.Pos.Y,fiber.Pos.Z});
+      for (auto ph_time : fiber.phtimes){
+	std::cout << "C ph_time = " << ph_time << std::endl;
+	auto l_hitContrib = c_caloHitContributions->create();
+	l_hitContrib.setTime(ph_time);
+	l_hit.addToContributions(l_hitContrib);
+      }
       //store me -> fiber.phtimes
     }
   }
@@ -296,5 +308,14 @@ void B4aEventAction::PrepareForRun()
   aux_infoHits = new edm4hep::SimCalorimeterHitCollection();
   l_evtstore->registerCollection("Auxiliary_infoHits",aux_infoHits);
   l_writer->registerForWrite("Auxiliary_infoHits");
+
+  s_caloHitContributions = new edm4hep::CaloHitContributionCollection();
+  l_evtstore->registerCollection("S_caloHitContrib",s_caloHitContributions);
+  l_writer->registerForWrite("S_caloHitContrib");
+
+  c_caloHitContributions = new edm4hep::CaloHitContributionCollection();
+  l_evtstore->registerCollection("C_caloHitContrib",c_caloHitContributions);
+  l_writer->registerForWrite("C_caloHitContrib");
+  
 }
 
