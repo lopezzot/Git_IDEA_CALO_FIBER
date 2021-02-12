@@ -56,6 +56,9 @@ target_link_libraries(exampleB4a ${Geant4_LIBRARIES}
                       ${HEPMC_LIBRARIES} ${HEPMC_FIO_LIBRARIES}
                       ${PYTHIA6_LIBRARIES} ${ROOT_LIBRARIES} gfortran EDM4HEP::edm4hep podio::podioRootIO)
 
+add_executable(ValidatePodioOutput utils/ValidatePodioOutput.cxx)
+target_link_libraries(ValidatePodioOutput ${ROOT_LIBRARIES} EDM4HEP::edm4hep podio::podioRootIO)
+
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
 # build B4a. This is so that we can run the executable directly because it
@@ -85,3 +88,5 @@ endforeach()
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
 #
 install(TARGETS exampleB4a DESTINATION bin)
+install(TARGETS ValidatePodioOutput DESTINATION bin)
+
