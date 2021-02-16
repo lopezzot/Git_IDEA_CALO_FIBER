@@ -8,6 +8,10 @@
 
 #include "globals.hh"
 
+#include "G4AutoLock.hh"
+
+namespace { G4Mutex B4PodioActionMutex = G4MUTEX_INITIALIZER; }
+
 class B4PodioManager
 {
  public:
@@ -17,6 +21,7 @@ class B4PodioManager
   bool Finish();
   podio::EventStore * GetEvtStore();
   podio::ROOTWriter * GetWriter();
+    
 
  protected:
   G4String m_filename_prefix;

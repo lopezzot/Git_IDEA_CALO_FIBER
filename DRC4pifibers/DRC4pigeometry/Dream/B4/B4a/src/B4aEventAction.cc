@@ -1,4 +1,4 @@
-//
+///
 // ********************************************************************
 // * License and Disclaimer                                           *
 // *                                                                  *
@@ -36,6 +36,7 @@
 #include "G4RunManager.hh"
 #include "G4Event.hh"
 #include "G4UnitsTable.hh"
+#include "G4AutoLock.hh"
 
 #include "Randomize.hh"
 #include <iomanip>
@@ -44,6 +45,8 @@
 // podio includes
 
 #include "podio/ROOTWriter.h"
+
+namespace { G4Mutex B4aEventActionMutex = G4MUTEX_INITIALIZER; }
 
 B4aEventAction::B4aEventAction() //definition of B4aEvenctAction contructor
  : G4UserEventAction(),
@@ -65,9 +68,11 @@ B4aEventAction::B4aEventAction() //definition of B4aEvenctAction contructor
    Fiber_Hits{0.},
    Fibers(0.),                 //vector of Fibers
    FiberIDs(0),                //vector of Fibers IDs
-   s_caloHits(0),
-   c_caloHits(0),
-   aux_infoHits(0)
+   s_caloHits(NULL),
+   c_caloHits(NULL),
+   aux_infoHits(NULL),
+   s_caloHitContributions(NULL),
+   c_caloHitContributions(NULL)
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -221,7 +226,6 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
       l_hit.setPosition({fiber.Pos.X,fiber.Pos.Y,fiber.Pos.Z});
       // Create the CaloHitContributions
       for (auto ph_time : fiber.phtimes){
-	std::cout << "S ph_time = " << ph_time << std::endl;
 	auto l_hitContrib = s_caloHitContributions->create();
 	l_hitContrib.setTime(ph_time);
 	l_hit.addToContributions(l_hitContrib);
@@ -233,7 +237,6 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
       l_hit.setEnergy(fiber.E);
       l_hit.setPosition({fiber.Pos.X,fiber.Pos.Y,fiber.Pos.Z});
       for (auto ph_time : fiber.phtimes){
-	std::cout << "C ph_time = " << ph_time << std::endl;
 	auto l_hitContrib = c_caloHitContributions->create();
 	l_hitContrib.setTime(ph_time);
 	l_hit.addToContributions(l_hitContrib);
@@ -281,18 +284,21 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   l_hit = aux_infoHits->create();
   l_hit.setCellID(8);
   l_hit.setEnergy(leakage);
-  
+  G4AutoLock lock(&B4aEventActionMutex);
   //print here if you need event by event some information of the screen
   std::cout<<"--->Event number of activated fibers: "<<Fibers.size()<<"<---"<<std::endl;
 
-  if (l_writer != NULL) l_writer->writeEvent();
-  if (l_store != NULL) l_store->clearCollections();
-
+    if (l_writer != NULL) l_writer->writeEvent();
+    if (l_store != NULL) l_store->clearCollections();
+  
 }
 
 void B4aEventAction::PrepareForRun()
 {
   B4PodioManager* podioManager = B4PodioManager::Instance();
+  
+  G4AutoLock lock(&B4aEventActionMutex);
+  
   podio::EventStore * l_evtstore = podioManager->GetEvtStore();
   if (l_evtstore == NULL) return;
   podio::ROOTWriter * l_writer = podioManager->GetWriter();
