@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #include "edm4hep/SimCalorimeterHitCollection.h"
+#include "edm4hep/CaloHitContributionCollection.h"
 #include "podio/EventStore.h"
 #include "podio/ROOTReader.h"
 
@@ -58,7 +59,22 @@ int main(int argc, char **argv)
 
    TH1F * h_s_energy = new TH1F("h_s_energy","",100,1,-1);
    TH1F * h_c_energy = new TH1F("h_c_energy","",100,1,-1);
+
+   bool doDetailed = false;
+   const edm4hep::CaloHitContributionCollection *s_caloHitContrib = NULL;
+   if (l_store.get("S_caloHitContrib",s_caloHitContrib)){
+     doDetailed = true;
+     std::cout << "Detailed timing information found" << std::endl;
+   } else {
+     std::cout << "Detailed timing information not found. The corresponding histograms will be empty" << std::endl;
+   }
    
+   TH1F * h_s_time = NULL;
+   TH1F * h_c_time = NULL;
+   if (doDetailed){
+     h_s_time = new TH1F("h_s_time","",100,1,-1);
+     h_c_time = new TH1F("h_c_time","",100,1,-1);
+   }
    // Now looping on all events
 
    for (unsigned int i_evt = 0; i_evt < nevents; ++i_evt){
@@ -68,6 +84,8 @@ int main(int argc, char **argv)
      auto & s_hitColl = l_store.get<edm4hep::SimCalorimeterHitCollection>("S_caloHits");
      auto & c_hitColl = l_store.get<edm4hep::SimCalorimeterHitCollection>("C_caloHits");
      auto & aux_hitColl = l_store.get<edm4hep::SimCalorimeterHitCollection>("Auxiliary_infoHits");
+     s_caloHitContrib = NULL;
+     l_store.get("S_caloHitContrib",s_caloHitContrib);
 
      // Computing average number of hits in 10 events
 
@@ -90,12 +108,22 @@ int main(int argc, char **argv)
 
      for (auto&  hit : s_hitColl){
        s_energy += hit.getEnergy();
+       if (doDetailed) {
+	 for (auto itr = hit.contributions_begin(); itr != hit.contributions_end(); ++itr){
+	   h_s_time->Fill(itr->getTime());
+	 }
+       } 
      }
 
      for (auto&  hit : c_hitColl){
        c_energy += hit.getEnergy();
+       if (doDetailed) {
+	 for (auto itr = hit.contributions_begin(); itr != hit.contributions_end(); ++itr){
+	   h_c_time->Fill(itr->getTime());
+	 }
+       }
      }
-
+       
      h_s_energy->Fill(s_energy);
      h_c_energy->Fill(c_energy);
 
@@ -124,15 +152,17 @@ int main(int argc, char **argv)
    g_c->SetName("g_hits_stability_c");
 
    TH1F * h_s_hits = g_s->GetHistogram();
-   TH1F * h_c_hits = g_c->GetHistogram();
-
-   
+   TH1F * h_c_hits = g_c->GetHistogram();   
    
    // Now need to make the actual plot of the stability of the number of hits vs event number
 
    f_output.cd();
    h_s_energy->Write();
    h_c_energy->Write();
+   if (doDetailed){
+     h_s_time->Write();
+     h_c_time->Write();
+   }
    g_s->Write();
    g_c->Write();
    f_output.Close();
