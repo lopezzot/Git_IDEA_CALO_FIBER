@@ -301,6 +301,7 @@ void B4aSteppingAction::UserSteppingAction(const G4Step* step)
 	      time_travel = distance/(speed_s_fiber*angle_distribution(generator));
 	      phtimes.push_back(step->GetTrack()->GetGlobalTime() + time_travel);     //fill vector of photon times    
 	    }
+	    std::cout<<" in step action: "<<vectPostip.X<<" "<<vectPostip.Y<<" "<<vectPostip.Z<<std::endl;
 	    fEventAction->appendfiber(C_fiber_ID, 0, copynumberslice, copynumbertower, c_signal, vectPostip, phtimes);
 	    //std::ofstream TimeFile;
             //TimeFile.open("Time.txt", std::ios_base::app);

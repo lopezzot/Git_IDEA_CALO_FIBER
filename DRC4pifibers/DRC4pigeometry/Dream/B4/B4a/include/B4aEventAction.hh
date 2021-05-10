@@ -93,7 +93,7 @@ class B4aEventAction : public G4UserEventAction
       
       void addfiber(Fiber f1){             //function to add single hit to fiber integrated signal (single hit passed by reference)
 	E = E+f1.E;                        //add hit photons
-	phtimes.insert(phtimes.end(), f1.phtimes.begin(), f1.phtimes.end()); //append photons time of arriva
+	phtimes.insert(phtimes.end(), f1.phtimes.begin(), f1.phtimes.end()); //append photons time of arrival
       };	
       
       void orderphtimes(){ //function to order photon times from first to last

@@ -224,6 +224,7 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
       l_hit.setCellID(fiber.ID);
       l_hit.setEnergy(fiber.E);
       l_hit.setPosition({fiber.Pos.X,fiber.Pos.Y,fiber.Pos.Z});
+      //std::cout<<"X: "<<fiber.Pos.X<<" Y: "<<fiber.Pos.Y<< " Z: "<<fiber.Pos.Z<<std::endl;
       // Create the CaloHitContributions
       for (auto ph_time : fiber.phtimes){
 	auto l_hitContrib = s_caloHitContributions->create();
@@ -249,7 +250,6 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   analysisManager->FillNtupleDColumn(0, Energyem);
   analysisManager->FillNtupleDColumn(1, EnergyScin);
   analysisManager->FillNtupleDColumn(2, EnergyCher);
-  //analysisManager->FillNtupleDColumn(3, NofCherenkovDetected);
   analysisManager->FillNtupleDColumn(3, EnergyTot);
   analysisManager->FillNtupleDColumn(4, PrimaryParticleEnergy);
   analysisManager->FillNtupleSColumn(5, PrimaryParticleName);
