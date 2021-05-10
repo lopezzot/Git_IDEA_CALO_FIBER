@@ -99,9 +99,9 @@ void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
   leakage = 0.;
   PrimaryParticleEnergy = 0;  
   
-  int fNbOfBarrel = 40;
-  int fNbOfEndcap = 35;
-  int fNbOfZRot = 36;
+  unsigned int fNbOfBarrel = 40;
+  unsigned int fNbOfEndcap = 35;
+  unsigned int fNbOfZRot = 36;
 
   Fibers.clear();
 
@@ -109,65 +109,65 @@ void B4aEventAction::BeginOfEventAction(const G4Event* /*event*/)
 	
   for (int i=0;i<1000000;i++) {Fiber_Hits[i]={0};}
 	
-  for (int i=0;i<VectorR.size();i++){VectorR.at(i)=0.;}
+  for (unsigned int i=0;i<VectorR.size();i++){VectorR.at(i)=0.;}
 
-  for (int i=0;i<VectorL.size();i++){VectorL.at(i)=0.;}
+  for (unsigned int i=0;i<VectorL.size();i++){VectorL.at(i)=0.;}
 	
-  for (int i=0;i<VectorR_loop.size();i++){VectorR_loop.at(i)=0.;}
+  for (unsigned int i=0;i<VectorR_loop.size();i++){VectorR_loop.at(i)=0.;}
 
-  for (int i=0;i<VectorL_loop.size();i++){VectorL_loop.at(i)=0.;}
+  for (unsigned int i=0;i<VectorL_loop.size();i++){VectorL_loop.at(i)=0.;}
        
-  for (int i=0;i<VectorSignalsR.size();i++){VectorSignalsR.at(i)=0.;}
+  for (unsigned int i=0;i<VectorSignalsR.size();i++){VectorSignalsR.at(i)=0.;}
     
-  for (int i=0;i<VectorSignalsL.size();i++){VectorSignalsL.at(i)=0.;}
+  for (unsigned int i=0;i<VectorSignalsL.size();i++){VectorSignalsL.at(i)=0.;}
 
-  for (int i=0;i<VectorSignalsCherR.size();i++){VectorSignalsCherR.at(i)=0.;}
+  for (unsigned int i=0;i<VectorSignalsCherR.size();i++){VectorSignalsCherR.at(i)=0.;}
 
-  for (int i=0;i<VectorSignalsCherL.size();i++){VectorSignalsCherL.at(i)=0.;}
+  for (unsigned int i=0;i<VectorSignalsCherL.size();i++){VectorSignalsCherL.at(i)=0.;}
     
-  for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
+  for(unsigned int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
     if(VectorR.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
       VectorR.push_back(0.);
     }
   }
 
-  for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
+  for(unsigned int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
     if(VectorL.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
       VectorL.push_back(0.);
     }
   }
     
-  for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
+  for(unsigned int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
     if(VectorR_loop.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
       VectorR_loop.push_back(0.);
     }
   }
     
-  for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
+  for(unsigned int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
     if(VectorL_loop.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
       VectorL_loop.push_back(0.);
     }
   }
 
-  for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
+  for(unsigned int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
     if(VectorSignalsR.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
       VectorSignalsR.push_back(0.);
     }
   }
     
-  for(int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
+  for(unsigned int i=0;i<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);i++){
     if(VectorSignalsL.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
     VectorSignalsL.push_back(0.);
     }
   }
 
-  for(int k=0;k<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);k++){
+  for(unsigned int k=0;k<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);k++){
     if(VectorSignalsCherR.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
       VectorSignalsCherR.push_back(0.);
     }
   }
   
-  for(int k=0;k<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);k++){
+  for(unsigned int k=0;k<=fNbOfZRot*(fNbOfBarrel+fNbOfEndcap);k++){
     if(VectorSignalsCherL.size() <= fNbOfZRot*(fNbOfBarrel+fNbOfEndcap)){
       VectorSignalsCherL.push_back(0.);
     }
@@ -223,8 +223,7 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
       auto l_hit = s_caloHits->create();
       l_hit.setCellID(fiber.ID);
       l_hit.setEnergy(fiber.E);
-      l_hit.setPosition({fiber.Pos.X,fiber.Pos.Y,fiber.Pos.Z});
-      //std::cout<<"X: "<<fiber.Pos.X<<" Y: "<<fiber.Pos.Y<< " Z: "<<fiber.Pos.Z<<std::endl;
+      l_hit.setPosition({(float) fiber.Pos.getX(),(float) fiber.Pos.getY(),(float) fiber.Pos.getZ()});
       // Create the CaloHitContributions
       for (auto ph_time : fiber.phtimes){
 	auto l_hitContrib = s_caloHitContributions->create();
@@ -236,7 +235,7 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
       auto l_hit = c_caloHits->create();              
       l_hit.setCellID(fiber.ID);
       l_hit.setEnergy(fiber.E);
-      l_hit.setPosition({fiber.Pos.X,fiber.Pos.Y,fiber.Pos.Z});
+      l_hit.setPosition({(float) fiber.Pos.getX(),(float) fiber.Pos.getY(),(float) fiber.Pos.getZ()});
       for (auto ph_time : fiber.phtimes){
 	auto l_hitContrib = c_caloHitContributions->create();
 	l_hitContrib.setTime(ph_time);
@@ -252,7 +251,7 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   analysisManager->FillNtupleDColumn(2, EnergyCher);
   analysisManager->FillNtupleDColumn(3, EnergyTot);
   analysisManager->FillNtupleDColumn(4, PrimaryParticleEnergy);
-  analysisManager->FillNtupleSColumn(5, PrimaryParticleName);
+  analysisManager->FillNtupleIColumn(5, PrimaryParticleID);
   analysisManager->FillNtupleDColumn(6, neutrinoleakage);
   analysisManager->FillNtupleDColumn(7, leakage);
   analysisManager->AddNtupleRow();                               //columns with vector are automatically filled with this function
@@ -286,7 +285,7 @@ void B4aEventAction::EndOfEventAction(const G4Event* event)
   l_hit.setEnergy(leakage);
   G4AutoLock lock(&B4aEventActionMutex);
   //print here if you need event by event some information of the screen
-  std::cout<<"--->Event number of activated fibers: "<<Fibers.size()<<"<---"<<std::endl;
+  std::cout<<"--->Event "<<event->GetEventID()<<": "<<"number of activated fibers: "<<Fibers.size()<<"<---"<<std::endl;
 
     if (l_writer != NULL) l_writer->writeEvent();
     if (l_store != NULL) l_store->clearCollections();

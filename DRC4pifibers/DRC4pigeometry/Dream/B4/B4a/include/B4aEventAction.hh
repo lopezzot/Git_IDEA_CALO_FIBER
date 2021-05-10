@@ -61,7 +61,7 @@ class B4aEventAction : public G4UserEventAction
     void AddCher(G4double de);                     //add energy in Cherenkov fibers
     void AddCherenkov();                           //add cherenkov photoelectron
     void Addenergy(G4double de);                   //add energy deposited in the calorimeter
-    void SavePrimaryParticle(G4String name);
+    void SavePrimaryParticle(G4int primaryparticlePDGID);
     void SavePrimaryEnergy(G4double primaryparticleenergy);
 
     //to save vectors in ntuple
@@ -131,7 +131,7 @@ private:
     G4double  EnergyCher;           //energy in Cherenkov fibers
     G4int     NofCherenkovDetected; //number of Cherenkov photons detected (in cherenkov fibers)
     G4double  EnergyTot;            //total energy deposited (does not count invisibile energy)
-    G4String PrimaryParticleName;   //name of primary particle
+    G4int PrimaryParticleID;        //PDGID of primary particle
     G4double PrimaryParticleEnergy; //primary particle energy
     G4double neutrinoleakage;       //leakage neutrino
     G4double leakage;               //leakage non neutrino
@@ -191,7 +191,7 @@ inline void B4aEventAction::WriteFiber_Info(G4double FID, G4double FE, G4int FTy
     Fiber_Hits[k].F_tower = tower;
 }
 
-inline void B4aEventAction::SavePrimaryParticle(G4String name){PrimaryParticleName = name;}
+inline void B4aEventAction::SavePrimaryParticle(G4int primaryparticlePDGID){PrimaryParticleID = primaryparticlePDGID;}
 
 inline void B4aEventAction::SavePrimaryEnergy(G4double primaryparticleenergy){PrimaryParticleEnergy = primaryparticleenergy;}
 
